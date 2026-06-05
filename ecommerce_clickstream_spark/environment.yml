@@ -1,0 +1,10 @@
+name: ecommerce-clickstream-spark
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pandas=3.0.3
+  - openjdk=17
+  - pip
+  - pip:
+      - pyspark==4.1.2

@@ -1,0 +1,32 @@
+# Python cache and local environments
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Jupyter / notebook runtime files
+.ipynb_checkpoints/
+
+# Spark generated outputs
+data/processed/
+data/output/
+
+# Runtime logs
+logs/
+*.log
+
+# Local OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Local secrets or machine-specific configuration
+.env
+*.env
+

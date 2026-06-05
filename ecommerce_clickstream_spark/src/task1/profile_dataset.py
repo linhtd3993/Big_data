@@ -1,8 +1,10 @@
-from pathlib import Path
 import pandas as pd
 
-RAW_DIR = Path("ecommerce_clickstream_spark/data/raw/kaggle_original")
-DOCS_DIR = Path("ecommerce_clickstream_spark/docs")
+from common.config import DOCS_DIR, RAW_DIR
+
+
+# Tao bao cao tong quan nhanh ve cac file CSV raw.
+# Script nay dung Pandas vi chi doc sample 1000 dong moi file.
 DOCS_DIR.mkdir(parents=True, exist_ok=True)
 
 csv_files = sorted(RAW_DIR.glob("*.csv"))
@@ -13,8 +15,10 @@ if not csv_files:
 summary_rows = []
 
 for file_path in csv_files:
+    # Doc sample de lay ten cot, kieu du lieu uoc luong va missing value ban dau.
     df_sample = pd.read_csv(file_path, nrows=1000)
 
+    # Dem so dong bang cach doc file text de tranh load toan bo CSV vao RAM.
     with open(file_path, "r", encoding="utf-8", errors="replace") as f:
         row_count = sum(1 for _ in f) - 1
 
@@ -42,6 +46,8 @@ for file_path in csv_files:
 
 summary_df = pd.DataFrame(summary_rows)
 summary_path = DOCS_DIR / "dataset_inventory.csv"
+
+# Luu inventory de dung lai trong bao cao va cac buoc phan tich sau.
 summary_df.to_csv(summary_path, index=False)
 
 print("=" * 80)
