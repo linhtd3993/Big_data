@@ -1,34 +1,34 @@
 # E-commerce Clickstream Spark Project
 
-Du an nay xay dung mot mini big data pipeline bang Apache Spark cho dataset e-commerce clickstream va transaction.
+Dự án này xây dựng một mini big data pipeline bằng Apache Spark cho dataset e-commerce clickstream và transaction.
 
-Trang thai hien tai:
+Trạng thái hiện tại:
 
-- Task 1 da hoan thanh: load raw data, clean data, validate output, va luu du lieu sach dang Parquet.
-- Task 2, Task 3, Task 4 se duoc cac thanh vien khac phat trien tiep dua tren output trong `data/processed/`.
+- Task 1 đã hoàn thành: load raw data, clean data, validate output, và lưu dữ liệu sạch dưới dạng Parquet.
+- Task 2, Task 3, Task 4 sẽ được các thành viên khác phát triển tiếp dựa trên output trong `data/processed/`.
 
 ---
 
-## 1. Project Scope
+## 1. Phạm Vi Dự Án
 
 Dataset:
 
 **Kaggle E-commerce Transactions + Clickstream**
 
-Muc tieu bai tap:
+Mục tiêu bài tập:
 
-| Task | Noi dung | Trang thai |
+| Task | Nội dung | Trạng thái |
 |---|---|---|
-| Task 1 | Load dataset va clean data | Completed |
+| Task 1 | Load dataset và clean data | Completed |
 | Task 2 | Compute key metrics: most active users, top products, peak activity time | Not started |
 | Task 3 | Group data by category and compute statistics | Not started |
 | Task 4 | Anomaly detection, trend analysis, or recommendation logic | Not started |
 
-Team nen dung output Task 1 trong `data/processed/` de lam cac task tiep theo.
+Team nên dùng output Task 1 trong `data/processed/` để làm các task tiếp theo.
 
 ---
 
-## 2. Folder Structure
+## 2. Cấu Trúc Thư Mục
 
 ```text
 ecommerce_clickstream_spark/
@@ -38,20 +38,20 @@ ecommerce_clickstream_spark/
     output/                    # Validation outputs
 
   docs/
-    project_owner_guide.md     # Detailed guide for project owner
+    project_owner_guide.md     # Tài liệu chi tiết cho người phụ trách dự án
     schema_mapping.md
 
-  reports/                     # Final or task reports
-  logs/                        # Runtime logs, ignored by Git
+  reports/                     # Báo cáo cuối cùng hoặc báo cáo theo task
+  logs/                        # Runtime logs, được ignore bởi Git
 
   src/
-    common/                    # Shared code for all tasks
+    common/                    # Code dùng chung cho tất cả task
       config.py
       schemas.py
       spark_utils.py
       cleaning_utils.py
 
-    task1/                     # Task 1 pipeline scripts
+    task1/                     # Các script pipeline của Task 1
       profile_dataset.py
       spark_schema_check.py
       clean_events_spark.py
@@ -66,24 +66,24 @@ ecommerce_clickstream_spark/
 
 ---
 
-## 3. Environment Setup
+## 3. Thiết Lập Môi Trường
 
-Recommended: use Conda.
+Khuyến nghị dùng Conda.
 
-Create environment:
+Tạo môi trường:
 
 ```bash
 conda env create -f environment.yml
 conda activate ecommerce-clickstream-spark
 ```
 
-If you already use Linh's local env:
+Nếu bạn đang dùng môi trường local cũ của Linh:
 
 ```bash
 conda activate ds
 ```
 
-Check environment:
+Kiểm tra môi trường:
 
 ```bash
 python3 --version
@@ -91,7 +91,7 @@ python3 -c "import pyspark; print(pyspark.__version__)"
 java -version
 ```
 
-Expected main versions:
+Các version chính dự kiến:
 
 ```text
 Python 3.11
@@ -102,15 +102,15 @@ pandas 3.0.3
 
 ---
 
-## 4. Data Setup
+## 4. Chuẩn Bị Dữ Liệu
 
-Raw CSV files should be placed here:
+Các file raw CSV cần được đặt tại:
 
 ```text
 data/raw/kaggle_original/
 ```
 
-Required raw files:
+Các file raw bắt buộc:
 
 ```text
 customers.csv
@@ -122,30 +122,30 @@ order_items.csv
 reviews.csv
 ```
 
-Important:
+Lưu ý quan trọng:
 
-- Do not edit raw CSV files directly.
-- Do not write new output into `src/`.
-- Spark output should go to `data/processed/` or `data/output/`.
-- `data/processed/`, `data/output/`, and `logs/` are ignored by Git.
+- Không chỉnh sửa trực tiếp raw CSV files.
+- Không ghi output mới vào `src/`.
+- Output của Spark nên được ghi vào `data/processed/` hoặc `data/output/`.
+- `data/processed/`, `data/output/`, và `logs/` đang được ignore bởi Git.
 
 ---
 
-## 5. How To Run Task 1
+## 5. Cách Chạy Task 1
 
-Always run commands from project root:
+Luôn chạy lệnh từ project root:
 
 ```bash
 cd /path/to/ecommerce_clickstream_spark
 ```
 
-Because source code is organized as packages under `src/`, use:
+Vì source code được tổ chức thành package trong `src/`, cần dùng:
 
 ```bash
 PYTHONPATH=src
 ```
 
-Recommended run order:
+Thứ tự chạy khuyến nghị:
 
 ```bash
 PYTHONPATH=src python3 -m task1.profile_dataset
@@ -156,7 +156,7 @@ PYTHONPATH=src python3 -m task1.validate_events_output
 PYTHONPATH=src python3 -m task1.validate_relationships_spark
 ```
 
-Optional: save logs while running:
+Nếu muốn lưu log khi chạy:
 
 ```bash
 PYTHONPATH=src python3 -m task1.clean_events_spark | tee logs/clean_events_spark.log
@@ -164,7 +164,7 @@ PYTHONPATH=src python3 -m task1.clean_events_spark | tee logs/clean_events_spark
 
 ---
 
-## 6. Task 1 Outputs
+## 6. Output Của Task 1
 
 Cleaned Parquet outputs:
 
@@ -183,19 +183,19 @@ Validation outputs:
 data/output/task1_validation/
 ```
 
-Task 2-4 members should read from:
+Thành viên làm Task 2-4 nên đọc dữ liệu từ:
 
 ```text
 data/processed/
 ```
 
-They should not read directly from `data/raw/` unless they intentionally need to inspect original data.
+Không nên đọc trực tiếp từ `data/raw/` trừ khi cần kiểm tra dữ liệu gốc.
 
 ---
 
-## 7. Current Cleaned Data Summary
+## 7. Tóm Tắt Dữ Liệu Đã Clean
 
-| Table | Clean rows |
+| Bảng | Số dòng sau clean |
 |---|---:|
 | events | 760,958 |
 | customers | 20,000 |
@@ -204,9 +204,9 @@ They should not read directly from `data/raw/` unless they intentionally need to
 | orders | 33,580 |
 | order_items | 59,053 |
 
-Relationship validation result:
+Kết quả relationship validation:
 
-| Check | Unmatched count |
+| Kiểm tra | Unmatched count |
 |---|---:|
 | events.session_id -> sessions.session_id | 0 |
 | events.product_id_int -> products.product_id | 0 |
@@ -215,26 +215,26 @@ Relationship validation result:
 | order_items.order_id -> orders.order_id | 0 |
 | order_items.product_id -> products.product_id | 0 |
 
-This means the cleaned tables are ready for joins in later tasks.
+Điều này có nghĩa là các bảng đã clean sẵn sàng để join trong các task sau.
 
 ---
 
-## 8. Important Data Cleaning Decisions
+## 8. Các Quyết Định Cleaning Quan Trọng
 
-### Do not globally drop nulls in `events`
+### Không drop null toàn cục trong `events`
 
-The `events` table contains business-rule nulls. Null values depend on `event_type`.
+Bảng `events` chứa các giá trị null theo quy tắc nghiệp vụ. Null phụ thuộc vào `event_type`.
 
-Examples:
+Ví dụ:
 
-| event_type | Expected data | Valid null fields |
+| event_type | Dữ liệu dự kiến có | Các field null vẫn hợp lệ |
 |---|---|---|
 | page_view | product_id | qty, cart_size, payment, amount_usd |
 | add_to_cart | product_id, qty | cart_size, payment, amount_usd |
 | checkout | cart_size | product_id, qty, payment, amount_usd |
 | purchase | payment, discount_pct, amount_usd | product_id, qty, cart_size |
 
-So Task 1 only filters rows missing core fields:
+Vì vậy Task 1 chỉ lọc các dòng thiếu core fields:
 
 ```text
 event_id
@@ -243,23 +243,23 @@ event_timestamp
 event_type
 ```
 
-### `sessions.csv` schema note
+### Lưu ý schema của `sessions.csv`
 
-`sessions.csv` has 6 columns:
+`sessions.csv` có 6 cột:
 
 ```text
 session_id, customer_id, start_time, device, source, country
 ```
 
-It does not have `end_time`.
+File này không có `end_time`.
 
-Do not add `end_time` to the sessions schema unless the raw dataset changes.
+Không thêm `end_time` vào sessions schema trừ khi raw dataset thay đổi.
 
 ---
 
-## 9. Guidelines For Task 2, Task 3, Task 4
+## 9. Gợi Ý Cho Task 2, Task 3, Task 4
 
-### Task 2 suggestions
+### Gợi ý cho Task 2
 
 Most active users:
 
@@ -281,7 +281,7 @@ Top products:
 events_cleaned_parquet + products_cleaned_parquet
 ```
 
-or for purchased products:
+Hoặc nếu muốn phân tích sản phẩm đã được mua:
 
 ```text
 order_items_cleaned_parquet + products_cleaned_parquet
@@ -293,7 +293,7 @@ Peak activity time:
 events_cleaned_parquet
 ```
 
-Useful columns:
+Các cột hữu ích:
 
 ```text
 event_hour
@@ -303,7 +303,7 @@ event_month
 event_year
 ```
 
-### Task 3 suggestions
+### Gợi ý cho Task 3
 
 Category statistics:
 
@@ -313,13 +313,13 @@ events_cleaned_parquet
 order_items_cleaned_parquet
 ```
 
-Useful join key:
+Join key hữu ích:
 
 ```text
 product_id
 ```
 
-### Task 4 suggestions
+### Gợi ý cho Task 4
 
 Trend analysis:
 
@@ -348,13 +348,13 @@ events_cleaned_parquet
 
 ---
 
-## 10. Development Rules For Team
+## 10. Quy Tắc Phát Triển Cho Team
 
-Please follow these rules:
+Vui lòng tuân thủ các quy tắc sau:
 
-1. Put shared helper code in `src/common/`.
-2. Put Task 1-only code in `src/task1/`.
-3. Create new folders for new tasks, for example:
+1. Code helper dùng chung đặt trong `src/common/`.
+2. Code chỉ dành riêng cho Task 1 đặt trong `src/task1/`.
+3. Các task mới nên tạo folder riêng, ví dụ:
 
 ```text
 src/task2/
@@ -362,27 +362,27 @@ src/task3/
 src/task4/
 ```
 
-4. Do not hardcode paths in new scripts. Use `common.config`.
-5. Do not redefine schemas in task scripts. Use `common.schemas`.
-6. Do not commit Spark output folders.
-7. Do not modify raw CSV files.
-8. Always run from project root.
-9. Use `PYTHONPATH=src` when running modules.
+4. Không hardcode path trong script mới. Hãy dùng `common.config`.
+5. Không định nghĩa lại schema trong task scripts. Hãy dùng `common.schemas`.
+6. Không commit Spark output folders.
+7. Không chỉnh sửa raw CSV files.
+8. Luôn chạy lệnh từ project root.
+9. Dùng `PYTHONPATH=src` khi chạy module.
 
-Example for new Task 2 script:
+Ví dụ script mới cho Task 2:
 
 ```text
 src/task2/active_users_spark.py
 ```
 
-Example import:
+Ví dụ import:
 
 ```python
 from common.config import PROCESSED_DIR
 from common.spark_utils import create_spark_session
 ```
 
-Example run:
+Ví dụ chạy:
 
 ```bash
 PYTHONPATH=src python3 -m task2.active_users_spark
@@ -390,15 +390,15 @@ PYTHONPATH=src python3 -m task2.active_users_spark
 
 ---
 
-## 11. Git Notes
+## 11. Ghi Chú Về Git
 
-This project is inside a larger Git repo:
+Dự án này nằm trong một Git repo lớn hơn:
 
 ```text
 /home/linhtd3993/workspace/projects/Big_data
 ```
 
-Current project `.gitignore` ignores:
+`.gitignore` hiện tại của project ignore:
 
 ```text
 data/processed/
@@ -409,22 +409,22 @@ __pycache__/
 .vscode/
 ```
 
-The parent repo may also ignore raw data and CSV files.
+Repo cha cũng có thể đang ignore raw data và CSV files.
 
-Before committing, check:
+Trước khi commit, kiểm tra:
 
 ```bash
 git status
 ```
 
-Recommended commit content:
+Nên commit:
 
-- source code in `src/`
-- docs in `docs/`
-- reports in `reports/`
-- config files like `.gitignore`, `environment.yml`, `README.md`
+- source code trong `src/`
+- tài liệu trong `docs/`
+- báo cáo trong `reports/`
+- config files như `.gitignore`, `environment.yml`, `README.md`
 
-Avoid committing:
+Tránh commit:
 
 - raw CSV files
 - processed Parquet folders
@@ -433,13 +433,13 @@ Avoid committing:
 
 ---
 
-## 12. More Documentation
+## 12. Tài Liệu Chi Tiết Hơn
 
-For a detailed owner-level explanation, read:
+Để đọc phần giải thích chi tiết cho người phụ trách dự án, xem:
 
 ```text
 docs/project_owner_guide.md
 ```
 
-That file explains the project history, decisions, cleaning logic, validation results, and next steps in more detail.
+File này giải thích lịch sử dự án, các quyết định kỹ thuật, cleaning logic, validation results, và các bước tiếp theo chi tiết hơn.
 
