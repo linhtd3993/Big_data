@@ -1,0 +1,42 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Environment and secrets
+.env
+*.env
+kaggle.json
+
+# Raw and generated data
+**/data/raw/*
+**/data/processed/*
+**/data/output/*
+*.csv
+*.parquet
+*.jsonl
+*.zip
+
+# Keep folder structure
+!**/data/raw/.gitkeep
+!**/data/processed/.gitkeep
+!**/data/output/.gitkeep
+
+# Logs
+*.log
+**/logs/*.log
+
+# OS / IDE
+.DS_Store
+.vscode/
+
