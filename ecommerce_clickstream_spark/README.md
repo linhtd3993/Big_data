@@ -60,6 +60,7 @@ ecommerce_clickstream_spark/
       validate_relationships_spark.py
 
   environment.yml
+  requirements.txt
   .gitignore
   README.md
 ```
@@ -68,7 +69,7 @@ ecommerce_clickstream_spark/
 
 ## 3. Thiết Lập Môi Trường
 
-Khuyến nghị dùng Conda.
+### Cách 1: Sử dụng Conda (Khuyến nghị)
 
 Tạo môi trường:
 
@@ -81,6 +82,21 @@ Nếu bạn đang dùng môi trường local cũ của Linh:
 
 ```bash
 conda activate ds
+```
+
+### Cách 2: Sử dụng Python venv + pip (Nếu không dùng Conda)
+
+> [!IMPORTANT]
+> Khi sử dụng phương pháp này, bạn phải cài đặt **Java (OpenJDK 17)** trên hệ thống của mình thủ công vì `pip` không thể tự động cấu hình môi trường Java cần thiết cho Spark.
+
+```bash
+# Tạo môi trường ảo
+python3 -m venv venv
+source venv/bin/activate  # Trên Linux/WSL
+# Hoặc trên Windows PowerShell: .\venv\Scripts\Activate.ps1
+
+# Cài đặt các thư viện phụ thuộc
+pip install -r requirements.txt
 ```
 
 Kiểm tra môi trường:
@@ -139,14 +155,9 @@ Luôn chạy lệnh từ project root:
 cd /path/to/ecommerce_clickstream_spark
 ```
 
-Vì source code được tổ chức thành package trong `src/`, cần dùng:
+Vì source code được tổ chức thành package trong `src/`, cần cấu hình biến môi trường `PYTHONPATH` khi chạy:
 
-```bash
-PYTHONPATH=src
-```
-
-Thứ tự chạy khuyến nghị:
-
+### Trên Linux/WSL/macOS (Bash):
 ```bash
 PYTHONPATH=src python3 -m task1.profile_dataset
 PYTHONPATH=src python3 -m task1.spark_schema_check
@@ -156,8 +167,18 @@ PYTHONPATH=src python3 -m task1.validate_events_output
 PYTHONPATH=src python3 -m task1.validate_relationships_spark
 ```
 
-Nếu muốn lưu log khi chạy:
+### Trên Windows (PowerShell):
+```powershell
+$env:PYTHONPATH="src"
+python3 -m task1.profile_dataset
+python3 -m task1.spark_schema_check
+python3 -m task1.clean_events_spark
+python3 -m task1.clean_supporting_tables_spark
+python3 -m task1.validate_events_output
+python3 -m task1.validate_relationships_spark
+```
 
+Nếu muốn lưu log khi chạy (trên Linux/WSL):
 ```bash
 PYTHONPATH=src python3 -m task1.clean_events_spark | tee logs/clean_events_spark.log
 ```
