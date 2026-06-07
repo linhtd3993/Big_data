@@ -1,7 +1,7 @@
 from pyspark.sql import functions as F
 
-from common.config import PROCESSED_DIR, RELATIONSHIP_VALIDATION_DIR
-from common.spark_utils import create_spark_session
+from src.common.config import PROCESSED_DIR, RELATIONSHIP_VALIDATION_DIR
+from src.common.spark_utils import create_spark_session
 
 
 # Thu muc luu ket qua validate quan he giua cac bang da clean.

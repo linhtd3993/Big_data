@@ -1,5 +1,5 @@
-from common.config import RAW_DIR, RAW_TABLE_NAMES
-from common.spark_utils import create_spark_session
+from src.common.config import RAW_DIR, RAW_TABLE_NAMES
+from src.common.spark_utils import create_spark_session
 
 # Script nay dung de kiem tra schema Spark doc duoc tu raw CSV.
 # Khac voi schemas.py, o day inferSchema giup doi chieu nhanh voi du lieu goc.

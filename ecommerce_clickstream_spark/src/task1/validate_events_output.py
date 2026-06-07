@@ -1,7 +1,7 @@
 from pyspark.sql import functions as F
 
-from common.config import PROCESSED_DIR
-from common.spark_utils import create_spark_session
+from src.common.config import PROCESSED_DIR
+from src.common.spark_utils import create_spark_session
 
 
 EVENTS_PROCESSED_PATH = PROCESSED_DIR / "events_cleaned_parquet"
