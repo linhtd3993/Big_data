@@ -5,7 +5,9 @@ Dự án này xây dựng một mini big data pipeline bằng Apache Spark cho d
 Trạng thái hiện tại:
 
 - Task 1 đã hoàn thành: load raw data, clean data, validate output, và lưu dữ liệu sạch dưới dạng Parquet.
-- Task 2, Task 3, Task 4 sẽ được các thành viên khác phát triển tiếp dựa trên output trong `data/processed/`.
+- Task 2 đã có pipeline Spark cho most active users, top products, và peak activity time.
+- Task 3 đang được triển khai bước đầu cho category statistics.
+- Task 4 chưa bắt đầu.
 
 ---
 
@@ -20,8 +22,8 @@ Mục tiêu bài tập:
 | Task | Nội dung | Trạng thái |
 |---|---|---|
 | Task 1 | Load dataset và clean data | Completed |
-| Task 2 | Compute key metrics: most active users, top products, peak activity time | Not started |
-| Task 3 | Group data by category and compute statistics | Not started |
+| Task 2 | Compute key metrics: most active users, top products, peak activity time | Implemented, cần chạy/kiểm tra output |
+| Task 3 | Group data by category and compute statistics | In progress |
 | Task 4 | Anomaly detection, trend analysis, or recommendation logic | Not started |
 
 Team nên dùng output Task 1 trong `data/processed/` để làm các task tiếp theo.
@@ -58,6 +60,17 @@ ecommerce_clickstream_spark/
       clean_supporting_tables_spark.py
       validate_events_output.py
       validate_relationships_spark.py
+
+    task2/                     # Các script metrics của Task 2
+      active_users_spark.py
+      top_products_spark.py
+      peak_activity_spark.py
+      run_task2_all.py
+
+    task3/                     # Các script phân tích category của Task 3
+      check_schema.py
+      analysis.py
+      category_statistics.py
 
   environment.yml
   requirements.txt
@@ -185,7 +198,45 @@ PYTHONPATH=src python3 -m task1.clean_events_spark | tee logs/clean_events_spark
 
 ---
 
-## 6. Output Của Task 1
+## 6. Cách Chạy Task 2
+
+Chạy toàn bộ Task 2:
+
+```bash
+PYTHONPATH=src python3 -m task2.run_task2_all
+```
+
+Hoặc chạy từng phần:
+
+```bash
+PYTHONPATH=src python3 -m task2.active_users_spark
+PYTHONPATH=src python3 -m task2.top_products_spark
+PYTHONPATH=src python3 -m task2.peak_activity_spark
+```
+
+Task 2 đọc dữ liệu từ `data/processed/` và ghi kết quả vào `data/output/task2_metrics/`.
+
+---
+
+## 7. Cách Chạy Task 3
+
+Kiểm tra schema các bảng processed cần cho Task 3:
+
+```bash
+PYTHONPATH=src python3 -m task3.check_schema
+```
+
+Chạy phân tích category bước đầu:
+
+```bash
+PYTHONPATH=src python3 -m task3.analysis
+```
+
+Lưu ý: `src/task3/category_statistics.py` hiện là file placeholder và cần được hoàn thiện nếu Task 3 cần ghi output chính thức.
+
+---
+
+## 8. Output Của Task 1
 
 Cleaned Parquet outputs:
 
@@ -214,7 +265,23 @@ Không nên đọc trực tiếp từ `data/raw/` trừ khi cần kiểm tra d�
 
 ---
 
-## 7. Tóm Tắt Dữ Liệu Đã Clean
+## 9. Output Của Task 2
+
+Task 2 ghi CSV output vào các thư mục sau:
+
+```text
+data/output/task2_metrics/most_active_users/
+data/output/task2_metrics/top_products/
+data/output/task2_metrics/peak_activity_by_hour/
+data/output/task2_metrics/peak_activity_by_day/
+data/output/task2_metrics/peak_activity_by_date/
+```
+
+Các thư mục output này đang được ignore bởi Git, nên cần chạy lại pipeline khi clone project sang máy mới.
+
+---
+
+## 10. Tóm Tắt Dữ Liệu Đã Clean
 
 | Bảng | Số dòng sau clean |
 |---|---:|
@@ -240,7 +307,7 @@ Kết quả relationship validation:
 
 ---
 
-## 8. Các Quyết Định Cleaning Quan Trọng
+## 11. Các Quyết Định Cleaning Quan Trọng
 
 ### Không drop null toàn cục trong `events`
 
@@ -278,7 +345,7 @@ Không thêm `end_time` vào sessions schema trừ khi raw dataset thay đổi.
 
 ---
 
-## 9. Gợi Ý Cho Task 2, Task 3, Task 4
+## 12. Gợi Ý Cho Task 2, Task 3, Task 4
 
 ### Gợi ý cho Task 2
 
@@ -369,12 +436,12 @@ events_cleaned_parquet
 
 ---
 
-## 10. Quy Tắc Phát Triển Cho Team
+## 13. Quy Tắc Phát Triển Cho Team
 
 Vui lòng tuân thủ các quy tắc sau:
 
 1. Code helper dùng chung đặt trong `src/common/`.
-2. Code chỉ dành riêng cho Task 1 đặt trong `src/task1/`.
+2. Code chỉ dành riêng cho từng task đặt trong folder tương ứng như `src/task1/`, `src/task2/`, `src/task3/`.
 3. Các task mới nên tạo folder riêng, ví dụ:
 
 ```text
@@ -411,7 +478,7 @@ PYTHONPATH=src python3 -m task2.active_users_spark
 
 ---
 
-## 11. Ghi Chú Về Git
+## 14. Ghi Chú Về Git
 
 Dự án này nằm trong một Git repo lớn hơn:
 
@@ -454,7 +521,7 @@ Tránh commit:
 
 ---
 
-## 12. Tài Liệu Chi Tiết Hơn
+## 15. Tài Liệu Chi Tiết Hơn
 
 Để đọc phần giải thích chi tiết cho người phụ trách dự án, xem:
 
@@ -463,4 +530,3 @@ docs/project_owner_guide.md
 ```
 
 File này giải thích lịch sử dự án, các quyết định kỹ thuật, cleaning logic, validation results, và các bước tiếp theo chi tiết hơn.
-

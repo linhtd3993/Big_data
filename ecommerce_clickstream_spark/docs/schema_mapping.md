@@ -94,6 +94,9 @@ Foreign Key:
 
 Role:
 Review Fact Table
+
+---
+
 # Main Relationships
 
 customers.customer_id
@@ -109,7 +112,9 @@ products.product_id
     -> order_items.product_id
     -> reviews.product_id
 
-# Task 1 Focus
+# Task Mapping
+
+## Task 1 - Data Ingestion And Cleaning
 
 Priority Tables:
 
@@ -123,6 +128,60 @@ Secondary Tables:
 
 1. customers.csv
 2. reviews.csv
+
+Main output layer:
+
+- data/processed/events_cleaned_parquet
+- data/processed/customers_cleaned_parquet
+- data/processed/sessions_cleaned_parquet
+- data/processed/products_cleaned_parquet
+- data/processed/orders_cleaned_parquet
+- data/processed/order_items_cleaned_parquet
+
+## Task 2 - Key Metrics
+
+Most active users:
+
+- Input: events_cleaned_parquet, sessions_cleaned_parquet, customers_cleaned_parquet
+- Join path: events.session_id -> sessions.session_id -> customers.customer_id
+- Output: data/output/task2_metrics/most_active_users/
+
+Top products:
+
+- Input: events_cleaned_parquet, products_cleaned_parquet
+- Join path: events.product_id_int -> products.product_id
+- Output: data/output/task2_metrics/top_products/
+
+Peak activity time:
+
+- Input: events_cleaned_parquet
+- Time columns: event_hour, day_of_week, event_date
+- Output:
+  - data/output/task2_metrics/peak_activity_by_hour/
+  - data/output/task2_metrics/peak_activity_by_day/
+  - data/output/task2_metrics/peak_activity_by_date/
+
+## Task 3 - Category Statistics
+
+Current implementation:
+
+- check_schema.py reads products, order_items, and events processed Parquet tables.
+- analysis.py groups products by category.
+
+Main fields:
+
+- products.category
+- products.product_id
+- products.price_usd
+- products.margin_usd
+
+Current aggregation:
+
+- product_count
+- avg_price
+- min_price
+- max_price
+- avg_margin
 
 # Data Quality Notes
 

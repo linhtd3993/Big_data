@@ -6,7 +6,7 @@ Tai lieu duoc viet dua tren file cap nhat gan nhat:
 
 `ecommerce_clickstream_task1_latest_progress_report_v02.docx`
 
-va trang thai moi nhat cua workspace sau khi da refactor code thanh `src/common/` va `src/task1/`.
+va trang thai moi nhat cua workspace sau khi da refactor code thanh `src/common/`, `src/task1/`, dong thoi da pull them code cho `src/task2/` va `src/task3/`.
 
 ---
 
@@ -31,7 +31,13 @@ Task 1 da hoan thanh ve mat ky thuat:
 - Kiem tra quan he giua cac bang.
 - Refactor code de team co the tiep tuc Task 2, Task 3, Task 4.
 
-Task 2, Task 3, Task 4 chua duoc implement trong folder nay. Cac thanh vien khac co the doc output tu `data/processed/`.
+Sau lan pull gan nhat:
+
+- Task 2 da co pipeline Spark cho most active users, top products, va peak activity time.
+- Task 3 da co schema check va category aggregation buoc dau.
+- Task 4 chua bat dau.
+
+Cac task tiep theo doc output tu `data/processed/` va ghi ket qua vao `data/output/`.
 
 ---
 
@@ -46,7 +52,7 @@ Trong do:
 - Task 3: Group theo category va tinh thong ke.
 - Task 4: Chon anomaly detection, trend analysis, hoac recommendation logic.
 
-Du an hien tai tap trung vao Task 1. Task 1 tao nen lop du lieu sach de cac task sau dung lai.
+Du an hien tai da hoan thanh lop du lieu sach cua Task 1, da co code Task 2, va dang bat dau Task 3.
 
 ---
 
@@ -127,8 +133,22 @@ ecommerce_clickstream_spark/
       validate_events_output.py
       validate_relationships_spark.py
 
+    task2/
+      __init__.py
+      active_users_spark.py
+      top_products_spark.py
+      peak_activity_spark.py
+      run_task2_all.py
+
+    task3/
+      __init__.py
+      check_schema.py
+      analysis.py
+      category_statistics.py
+
   .gitignore
   environment.yml
+  requirements.txt
 ```
 
 Y nghia:
@@ -137,12 +157,16 @@ Y nghia:
 |---|---|
 | `src/common/` | Code dung chung cho nhieu task |
 | `src/task1/` | Script rieng cua Task 1 |
+| `src/task2/` | Script metrics cua Task 2 |
+| `src/task3/` | Script phan tich category cua Task 3 |
 | `data/raw/` | Du lieu goc |
 | `data/processed/` | Du lieu da clean dang Parquet |
 | `data/output/` | Ket qua validation nho |
 | `docs/` | Tai lieu ky thuat |
+| `reports/` | Bao cao tien do va bao cao theo task |
 | `logs/` | Log khi chay pipeline |
 | `environment.yml` | Moi truong conda cho team |
+| `requirements.txt` | Moi truong pip cho team khong dung Conda |
 | `.gitignore` | Chan commit cache, logs, output Spark |
 
 ---
@@ -315,7 +339,119 @@ Tat ca unmatched count hien tai bang 0.
 
 ---
 
-## 7. Cach Chay Project Hien Tai
+## 7. Vai Tro Cac File Trong `src/task2`
+
+Task 2 tinh cac metric chinh dua tren output da clean tu Task 1.
+
+### `active_users_spark.py`
+
+Tinh most active users bang cach join:
+
+```text
+events.session_id -> sessions.session_id -> sessions.customer_id
+```
+
+Metrics hien co:
+
+- total_events
+- total_sessions
+- page_view_count
+- add_to_cart_count
+- checkout_count
+- purchase_count
+
+Output:
+
+```text
+data/output/task2_metrics/most_active_users/
+```
+
+### `top_products_spark.py`
+
+Tinh top products dua tren clickstream events co san pham.
+
+Join:
+
+```text
+events.product_id_int -> products.product_id
+```
+
+Metrics hien co:
+
+- total_product_events
+- view_count
+- add_to_cart_count
+- purchase_event_count
+
+Output:
+
+```text
+data/output/task2_metrics/top_products/
+```
+
+### `peak_activity_spark.py`
+
+Tinh thoi diem website co nhieu hoat dong nhat theo:
+
+- event_hour
+- day_of_week
+- event_date
+
+Output:
+
+```text
+data/output/task2_metrics/peak_activity_by_hour/
+data/output/task2_metrics/peak_activity_by_day/
+data/output/task2_metrics/peak_activity_by_date/
+```
+
+### `run_task2_all.py`
+
+Chay lan luot ca 3 phan cua Task 2:
+
+1. Most active users
+2. Top products
+3. Peak activity time
+
+---
+
+## 8. Vai Tro Cac File Trong `src/task3`
+
+Task 3 hien dang o trang thai trien khai ban dau.
+
+### `check_schema.py`
+
+Doc cac bang processed:
+
+- products_cleaned_parquet
+- order_items_cleaned_parquet
+- events_cleaned_parquet
+
+Muc dich la in schema de chuan bi category statistics.
+
+### `analysis.py`
+
+Doc `products_cleaned_parquet`, group theo `category`, va tinh:
+
+- product_count
+- avg_price
+- min_price
+- max_price
+- avg_margin
+
+Hien tai script nay in ket qua ra console va chua ghi output chinh thuc.
+
+### `category_statistics.py`
+
+File nay hien dang la placeholder. Neu can output Task 3 chinh thuc, nen hoan thien file nay de ghi ket qua vao:
+
+```text
+data/output/task3_category_statistics/
+```
+
+---
+
+## 9. Cach Chay Project Hien Tai
 
 Chay tu project root:
 
@@ -352,6 +488,27 @@ PYTHONPATH=src python3 -m task1.validate_events_output
 PYTHONPATH=src python3 -m task1.validate_relationships_spark
 ```
 
+Chay Task 2:
+
+```bash
+PYTHONPATH=src python3 -m task2.run_task2_all
+```
+
+Hoac chay tung phan:
+
+```bash
+PYTHONPATH=src python3 -m task2.active_users_spark
+PYTHONPATH=src python3 -m task2.top_products_spark
+PYTHONPATH=src python3 -m task2.peak_activity_spark
+```
+
+Chay Task 3 hien tai:
+
+```bash
+PYTHONPATH=src python3 -m task3.check_schema
+PYTHONPATH=src python3 -m task3.analysis
+```
+
 Neu muon luu log:
 
 ```bash
@@ -364,7 +521,7 @@ Luu y:
 
 ---
 
-## 8. Moi Truong Chay
+## 10. Moi Truong Chay
 
 Moi truong da duoc dua vao:
 
@@ -396,7 +553,7 @@ java -version
 
 ---
 
-## 9. Cleaning Logic Cho `events.csv`
+## 11. Cleaning Logic Cho `events.csv`
 
 Bang `events.csv` duoc clean theo cac buoc:
 
@@ -447,7 +604,7 @@ Event type counts:
 
 ---
 
-## 10. Quyet Dinh Quan Trong Ve Null
+## 12. Quyet Dinh Quan Trong Ve Null
 
 Khong duoc `dropna` toan bo bang `events`.
 
@@ -468,7 +625,7 @@ Day la **business-rule null**, khong phai dirty data.
 
 ---
 
-## 11. Cleaning Logic Cho Bang Phu
+## 13. Cleaning Logic Cho Bang Phu
 
 Cac bang phu duoc clean theo pattern chung:
 
@@ -493,7 +650,7 @@ Ket qua:
 
 ---
 
-## 12. Relationship Validation
+## 14. Relationship Validation
 
 Ket qua validate quan he:
 
@@ -512,7 +669,7 @@ Du lieu da clean co the join duoc cho Task 2, Task 3, Task 4.
 
 ---
 
-## 13. Output Cho Cac Task Sau
+## 15. Output Cho Cac Task Sau
 
 Cac thanh vien Task 2-4 nen doc tu:
 
@@ -537,6 +694,18 @@ orders_cleaned_parquet
 order_items_cleaned_parquet
 ```
 
+Output Task 2:
+
+```text
+data/output/task2_metrics/most_active_users/
+data/output/task2_metrics/top_products/
+data/output/task2_metrics/peak_activity_by_hour/
+data/output/task2_metrics/peak_activity_by_day/
+data/output/task2_metrics/peak_activity_by_date/
+```
+
+Task 3 hien chua co output folder chinh thuc. Khi hoan thien nen ghi vao `data/output/task3_category_statistics/`.
+
 Goi y dung cho cac task sau:
 
 | Task sau | Nen dung bang nao |
@@ -549,7 +718,7 @@ Goi y dung cho cac task sau:
 
 ---
 
-## 14. Git Va Data
+## 16. Git Va Data
 
 `.gitignore` hien tai ignore:
 
@@ -577,7 +746,7 @@ Y nghia:
 
 ---
 
-## 15. Docker/HDFS
+## 17. Docker/HDFS
 
 Docker/HDFS hien dang **postpone**.
 
@@ -599,7 +768,7 @@ Local raw CSV
 
 ---
 
-## 16. Cac Van De Da Gap Va Da Sua
+## 18. Cac Van De Da Gap Va Da Sua
 
 | Van de | Nguyen nhan | Cach xu ly |
 |---|---|---|
@@ -613,7 +782,7 @@ Local raw CSV
 
 ---
 
-## 17. Trang Thai Hien Tai
+## 19. Trang Thai Hien Tai
 
 Da hoan thanh:
 
@@ -623,20 +792,23 @@ Da hoan thanh:
 - Validate output.
 - Validate relationships.
 - Refactor `src/common` va `src/task1`.
+- Them Task 2 metrics pipeline trong `src/task2`.
+- Them Task 3 schema check va category analysis buoc dau trong `src/task3`.
 - Tao `.gitignore`.
 - Tao `environment.yml`.
+- Tao `requirements.txt`.
 
 Can lam tiep:
 
-1. Tao README.md cho nguoi moi clone project.
-2. Tao file handoff cho teammate.
-3. Tao report Task 1 de nop/dua vao final report.
-4. Cap nhat command moi trong docs/logs neu can.
-5. Sau khi team lam Task 2-4, moi can xem lai Docker/HDFS.
+1. Chay lai Task 2 tren may local va luu output/log neu can.
+2. Hoan thien `src/task3/category_statistics.py` de ghi output chinh thuc.
+3. Tao hoac cap nhat report cho Task 1, Task 2, Task 3.
+4. Kiem tra lai README, schema mapping, va project owner guide truoc khi nop.
+5. Sau khi team lam Task 4, moi can xem lai Docker/HDFS neu muon nang cap kien truc.
 
 ---
 
-## 18. Lenh Kiem Tra Nhanh
+## 20. Lenh Kiem Tra Nhanh
 
 Compile toan bo code:
 
@@ -665,9 +837,22 @@ PYTHONPATH=src python3 -m task1.validate_events_output
 PYTHONPATH=src python3 -m task1.validate_relationships_spark
 ```
 
+Chay full Task 2:
+
+```bash
+PYTHONPATH=src python3 -m task2.run_task2_all
+```
+
+Chay Task 3 hien tai:
+
+```bash
+PYTHONPATH=src python3 -m task3.check_schema
+PYTHONPATH=src python3 -m task3.analysis
+```
+
 ---
 
-## 19. Ghi Chu Cho Linh
+## 21. Ghi Chu Cho Linh
 
 Neu ban quay lai project sau vai ngay, hay doc theo thu tu:
 
@@ -677,8 +862,9 @@ Neu ban quay lai project sau vai ngay, hay doc theo thu tu:
 4. `src/task1/clean_events_spark.py` - xem clean events.
 5. `src/task1/clean_supporting_tables_spark.py` - xem clean bang phu.
 6. `src/task1/validate_relationships_spark.py` - xem quan he giua bang.
+7. `src/task2/run_task2_all.py` - xem pipeline metrics Task 2.
+8. `src/task3/analysis.py` - xem category aggregation buoc dau.
 
 Dieu can nho nhat:
 
-**Task 1 khong chi clean data, ma tao mot processed data layer sach de ca team dung cho Task 2-4.**
-
+**Task 1 tao processed data layer sach; Task 2 da bat dau dung layer nay de tao metrics; Task 3 dang tiep tuc mo rong theo category.**
