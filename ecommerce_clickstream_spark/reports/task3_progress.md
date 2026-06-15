@@ -28,9 +28,12 @@ Task 3 scripts are stored in `src/task3/`:
 
 Current behavior:
 
-- `check_schema.py` prints schemas for products, order_items, and events.
-- `analysis.py` groups products by category and computes product count, average price, min price, max price, and average margin.
-- `category_statistics.py` is currently a placeholder.
+- Computes catalog price and margin statistics.
+- Computes page views and add-to-cart activity.
+- Computes orders, units sold, revenue, and estimated gross margin.
+- Computes review count and average rating.
+- Computes conversion rates and revenue rank.
+- Reconciles products, units, revenue, and reviews with source totals.
 
 ## Commands
 
@@ -39,9 +42,7 @@ PYTHONPATH=src python3 -m task3.check_schema
 PYTHONPATH=src python3 -m task3.analysis
 ```
 
-## Planned Output
-
-Recommended official output folder:
+## Output
 
 ```text
 data/output/task3_category_statistics/
@@ -49,4 +50,5 @@ data/output/task3_category_statistics/
 
 ## Current Status
 
-In progress. The basic category aggregation exists, but Task 3 still needs an official output writer and final validation before it can be marked completed.
+Completed. Validation confirms 1,197 products, 77,031 units,
+USD 4,832,351.23 gross revenue, and 10,780 reviews.

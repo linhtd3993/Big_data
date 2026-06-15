@@ -1,7 +1,7 @@
 from pyspark.sql import functions as F
 
-from src.common.config import PROCESSED_DIR, RELATIONSHIP_VALIDATION_DIR
-from src.common.spark_utils import create_spark_session
+from common.config import PROCESSED_DIR, RELATIONSHIP_VALIDATION_DIR
+from common.spark_utils import create_spark_session
 
 
 # Thu muc luu ket qua validate quan he giua cac bang da clean.
@@ -18,6 +18,7 @@ sessions = spark.read.parquet(str(PROCESSED_DIR / "sessions_cleaned_parquet"))
 products = spark.read.parquet(str(PROCESSED_DIR / "products_cleaned_parquet"))
 orders = spark.read.parquet(str(PROCESSED_DIR / "orders_cleaned_parquet"))
 order_items = spark.read.parquet(str(PROCESSED_DIR / "order_items_cleaned_parquet"))
+reviews = spark.read.parquet(str(PROCESSED_DIR / "reviews_cleaned_parquet"))
 
 
 def count_left_unmatched(left_df, right_df, left_key, right_key):
@@ -42,6 +43,7 @@ customers_total = customers.count()
 products_total = products.count()
 orders_total = orders.count()
 order_items_total = order_items.count()
+reviews_total = reviews.count()
 
 checks.append(("events_total_rows", events_total))
 checks.append(("sessions_total_rows", sessions_total))
@@ -49,6 +51,7 @@ checks.append(("customers_total_rows", customers_total))
 checks.append(("products_total_rows", products_total))
 checks.append(("orders_total_rows", orders_total))
 checks.append(("order_items_total_rows", order_items_total))
+checks.append(("reviews_total_rows", reviews_total))
 
 
 # Quan he 1: events.session_id -> sessions.session_id.
@@ -112,6 +115,22 @@ order_items_product_unmatched = count_left_unmatched(
     "product_id"
 )
 checks.append(("unmatched_order_items_product_id_to_products", order_items_product_unmatched))
+
+reviews_order_unmatched = count_left_unmatched(
+    reviews.select("order_id").dropDuplicates(),
+    orders.select("order_id").dropDuplicates(),
+    "order_id",
+    "order_id"
+)
+checks.append(("unmatched_reviews_order_id_to_orders", reviews_order_unmatched))
+
+reviews_product_unmatched = count_left_unmatched(
+    reviews.select("product_id").dropDuplicates(),
+    products.select("product_id").dropDuplicates(),
+    "product_id",
+    "product_id"
+)
+checks.append(("unmatched_reviews_product_id_to_products", reviews_product_unmatched))
 
 
 # Chuyen danh sach metric thanh DataFrame de vua in ra console vua ghi thanh CSV.

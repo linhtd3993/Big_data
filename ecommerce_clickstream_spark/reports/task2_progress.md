@@ -22,6 +22,8 @@ Main tables:
 - sessions_cleaned_parquet
 - customers_cleaned_parquet
 - products_cleaned_parquet
+- orders_cleaned_parquet
+- order_items_cleaned_parquet
 
 ## Implementation
 
@@ -60,4 +62,6 @@ data/output/task2_metrics/peak_activity_by_date/
 
 ## Current Status
 
-Implemented. The next step is to run the pipeline on the local processed data and capture final output samples for the final report or slides.
+Completed and validated. Top products now combines clickstream engagement with
+purchase orders, units sold, revenue, and conversion rates. All five output
+datasets pass schema, row-count, and key-null validation.

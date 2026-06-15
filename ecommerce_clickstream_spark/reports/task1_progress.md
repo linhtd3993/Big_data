@@ -32,6 +32,8 @@ Task 1 scripts are stored in `src/task1/`:
 - `clean_supporting_tables_spark.py`
 - `validate_events_output.py`
 - `validate_relationships_spark.py`
+- `validate_business_rules.py`
+- `run_task1_all.py`
 
 Common helpers are stored in `src/common/`.
 
@@ -57,6 +59,7 @@ data/processed/sessions_cleaned_parquet
 data/processed/products_cleaned_parquet
 data/processed/orders_cleaned_parquet
 data/processed/order_items_cleaned_parquet
+data/processed/reviews_cleaned_parquet
 ```
 
 Validation output:
@@ -67,6 +70,9 @@ data/output/task1_validation/
 
 ## Current Status
 
-Completed. The cleaned tables are ready for Task 2, Task 3, and Task 4.
+Completed. All seven raw tables are cleaned and available as Parquet.
 
-Relationship validation currently reports zero unmatched records for the main joins.
+Relationship validation reports zero unmatched records for all eight joins.
+Business validation covers allowed event types, positive quantities, monetary
+consistency, discount ranges, margins, ratings, customer age, and event/session
+time ordering.

@@ -29,6 +29,7 @@ primary_keys = {
     "products": ["product_id"],
     "orders": ["order_id"],
     "order_items": ["order_id", "product_id"],
+    "reviews": ["review_id"],
 }
 
 
@@ -39,6 +40,7 @@ required_fields = {
     "products": ["product_id", "category"],
     "orders": ["order_id", "customer_id", "order_time"],
     "order_items": ["order_id", "product_id", "quantity"],
+    "reviews": ["review_id", "order_id", "product_id", "rating", "review_time"],
 }
 
 
@@ -49,6 +51,7 @@ text_columns = {
     "products": ["category", "name"],
     "orders": ["payment_method", "country", "device", "source"],
     "order_items": [],
+    "reviews": ["review_text"],
 }
 
 
@@ -91,9 +94,33 @@ def clean_table(table_name: str):
     after_required_filter_count = df.count()
     required_field_rows_removed = before_required_filter_count - after_required_filter_count
 
-    # Buoc 4: xoa duplicate theo khoa chinh cua tung bang.
+    # Buoc 4: xu ly duplicate theo khoa chinh cua tung bang.
     before_pk_dedup_count = df.count()
-    df = df.dropDuplicates(primary_keys[table_name])
+
+    if table_name == "order_items":
+        # Mot order co the chua cung product tren nhieu dong. Gom cac dong nay
+        # thay vi drop tuy y de bao toan quantity va doanh thu.
+        df = (
+            df.groupBy("order_id", "product_id")
+            .agg(
+                F.sum("quantity").cast("int").alias("quantity"),
+                F.round(F.sum("line_total_usd"), 2).alias("line_total_usd"),
+            )
+            .withColumn(
+                "unit_price_usd",
+                F.round(F.col("line_total_usd") / F.col("quantity"), 2),
+            )
+            .select(
+                "order_id",
+                "product_id",
+                "unit_price_usd",
+                "quantity",
+                "line_total_usd",
+            )
+        )
+    else:
+        df = df.dropDuplicates(primary_keys[table_name])
+
     after_pk_dedup_count = df.count()
     duplicate_pk_rows_removed = before_pk_dedup_count - after_pk_dedup_count
 
@@ -112,6 +139,14 @@ def clean_table(table_name: str):
             .withColumn("order_hour", F.hour(F.col("order_time")))
             .withColumn("order_year", F.year(F.col("order_time")))
             .withColumn("order_month", F.month(F.col("order_time")))
+        )
+
+    if table_name == "reviews":
+        df = (
+            df
+            .withColumn("review_date", F.to_date(F.col("review_time")))
+            .withColumn("review_year", F.year(F.col("review_time")))
+            .withColumn("review_month", F.month(F.col("review_time")))
         )
 
     clean_count = df.count()
