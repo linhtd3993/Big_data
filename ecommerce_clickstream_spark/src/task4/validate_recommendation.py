@@ -1,40 +1,89 @@
-from common.config import PROCESSED_DIR
+from pathlib import Path
+
+from pyspark.sql import functions as F
+
+from common.config import TASK4_OUTPUT_DIR
 from common.spark_utils import create_spark_session
 
-# Khoi tao Spark Session
-spark = create_spark_session("Task4ValidateRecommendation")
 
-print("=" * 80)
-print("TASK 4 - VALIDATION OF RECOMMENDATION OUTPUT")
-print("=" * 80)
+def main():
+    spark = create_spark_session("Task4ValidateRecommendation")
 
-output_path = PROCESSED_DIR / "recommendations_output"
+    try:
+        recommendations = spark.read.parquet(
+            str(TASK4_OUTPUT_DIR / "recommendations_parquet")
+        )
+        metrics = spark.read.option("header", True).option(
+            "inferSchema", True
+        ).csv(str(TASK4_OUTPUT_DIR / "evaluation_metrics"))
 
-try:
-    # Doc du lieu goi y da duoc luu dang Parquet
-    recs_df = spark.read.parquet(str(output_path))
-    
-    # Lay tong so dong
-    total_recs = recs_df.count()
-    print(f"Tong so dong trong ket qua goi y: {total_recs}")
-    
-    print("\nCau truc schema cua ket qua goi y:")
-    recs_df.printSchema()
-    
-    # Hien thi vi du goi y cua 5 khach hang dau tien
-    print("\nVi du goi y cho 5 khach hang dau tien:")
-    sample_customers = recs_df.select("customer_id").distinct().limit(5).collect()
-    customer_ids = [row.customer_id for row in sample_customers]
-    
-    filtered_df = recs_df.filter(recs_df.customer_id.isin(customer_ids))
-    filtered_df.orderBy("customer_id", recs_df.predicted_rating.desc()).show(30, truncate=False)
-    
-except Exception as e:
-    print(f"Loi khi doc ket qua goi y: {e}")
-    print("Hay dam bao rang ban da chay file train_recommendation.py truoc.")
+        checks = [
+            (
+                "recommendations_not_empty",
+                recommendations.count() > 0,
+                str(recommendations.count()),
+            ),
+            (
+                "rank_between_1_and_10",
+                recommendations.filter(~F.col("rank").between(1, 10)).count() == 0,
+                str(
+                    recommendations.filter(
+                        ~F.col("rank").between(1, 10)
+                    ).count()
+                ),
+            ),
+            (
+                "unique_user_rank",
+                recommendations.groupBy("customer_id", "rank")
+                .count()
+                .filter(F.col("count") > 1)
+                .count()
+                == 0,
+                "duplicate user-rank pairs",
+            ),
+            (
+                "four_metrics_per_model",
+                metrics.groupBy("model_name")
+                .count()
+                .filter(F.col("count") != 4)
+                .count()
+                == 0,
+                "Precision, Recall, MAP, NDCG",
+            ),
+            (
+                "metrics_in_valid_range",
+                metrics.filter(~F.col("value").between(0.0, 1.0)).count() == 0,
+                "expected [0, 1]",
+            ),
+            (
+                "metrics_image_exists",
+                Path(
+                    TASK4_OUTPUT_DIR / "images" / "model_metrics_comparison.svg"
+                ).exists(),
+                "model_metrics_comparison.svg",
+            ),
+            (
+                "interaction_image_exists",
+                Path(
+                    TASK4_OUTPUT_DIR / "images" / "interaction_distribution.svg"
+                ).exists(),
+                "interaction_distribution.svg",
+            ),
+        ]
 
-print("=" * 80)
-print("KET THUC KIEM TRA GOI Y TASK 4")
-print("=" * 80)
+        result = spark.createDataFrame(
+            checks, ["check_name", "passed", "details"]
+        )
+        result.show(100, truncate=False)
+        (
+            result.coalesce(1)
+            .write.mode("overwrite")
+            .option("header", True)
+            .csv(str(TASK4_OUTPUT_DIR / "validation"))
+        )
+    finally:
+        spark.stop()
 
-spark.stop()
+
+if __name__ == "__main__":
+    main()

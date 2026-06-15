@@ -20,6 +20,7 @@
 from task2.active_users_spark import main as run_active_users
 from task2.top_products_spark import main as run_top_products
 from task2.peak_activity_spark import main as run_peak_activity
+from task2.validate_task2 import main as validate_task2
 
 
 def main():
@@ -33,6 +34,9 @@ def main():
 
     print("\n[3/3] Running Peak Activity Time...")
     run_peak_activity()
+
+    print("\n[4/4] Validating Task 2 outputs...")
+    validate_task2()
 
     print("\n========== FULL TASK 2 PIPELINE COMPLETED ==========")
 

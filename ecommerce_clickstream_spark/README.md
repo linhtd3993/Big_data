@@ -4,10 +4,11 @@ Dự án này xây dựng một mini big data pipeline bằng Apache Spark cho d
 
 Trạng thái hiện tại:
 
-- Task 1 đã hoàn thành: load raw data, clean data, validate output, và lưu dữ liệu sạch dưới dạng Parquet.
-- Task 2 đã có pipeline Spark cho most active users, top products, và peak activity time.
-- Task 3 đang được triển khai bước đầu cho category statistics.
-- Task 4 chưa bắt đầu.
+- Task 1 hoàn thành cleaning 7 bảng, relationship validation và business validation.
+- Task 2 hoàn thành analytics, transaction metrics và output validation.
+- Task 3 hoàn thành category statistics và reconciliation với dữ liệu nguồn.
+- Task 4 hoàn thành implicit ALS end-to-end, popularity baseline, temporal split,
+  4 ranking metrics, model output, recommendations và biểu đồ SVG.
 
 ---
 
@@ -21,10 +22,10 @@ Mục tiêu bài tập:
 
 | Task | Nội dung | Trạng thái |
 |---|---|---|
-| Task 1 | Load dataset và clean data | Completed |
-| Task 2 | Compute key metrics: most active users, top products, peak activity time | Implemented, cần chạy/kiểm tra output |
-| Task 3 | Group data by category and compute statistics | In progress |
-| Task 4 | Anomaly detection, trend analysis, or recommendation logic | Not started |
+| Task 1 | Load dataset, clean và validate data | Completed |
+| Task 2 | Most active users, top products, peak activity | Completed |
+| Task 3 | Category statistics | Completed |
+| Task 4 | Recommendation System bằng Spark ALS | Completed |
 
 Team nên dùng output Task 1 trong `data/processed/` để làm các task tiếp theo.
 
@@ -71,6 +72,11 @@ ecommerce_clickstream_spark/
       check_schema.py
       analysis.py
       category_statistics.py
+
+    task4/                     # Recommendation pipeline
+      train_recommendation.py
+      validate_recommendation.py
+      run_task4_all.py
 
   environment.yml
   requirements.txt
@@ -178,6 +184,13 @@ PYTHONPATH=src python3 -m task1.clean_events_spark
 PYTHONPATH=src python3 -m task1.clean_supporting_tables_spark
 PYTHONPATH=src python3 -m task1.validate_events_output
 PYTHONPATH=src python3 -m task1.validate_relationships_spark
+PYTHONPATH=src python3 -m task1.validate_business_rules
+```
+
+Chạy toàn bộ Task 1:
+
+```bash
+PYTHONPATH=src python3 -m task1.run_task1_all
 ```
 
 ### Trên Windows (PowerShell):
@@ -232,11 +245,31 @@ Chạy phân tích category bước đầu:
 PYTHONPATH=src python3 -m task3.analysis
 ```
 
-Lưu ý: `src/task3/category_statistics.py` hiện là file placeholder và cần được hoàn thiện nếu Task 3 cần ghi output chính thức.
+Task 3 ghi category statistics và validation vào
+`data/output/task3_category_statistics/`.
 
 ---
 
-## 8. Output Của Task 1
+## 8. Cách Chạy Task 4
+
+```bash
+PYTHONPATH=src python3 -m task4.run_task4_all
+```
+
+Pipeline thực hiện:
+
+1. Tạo interaction từ `page_view`, `add_to_cart` và purchase.
+2. Gộp interaction theo customer-product.
+3. Chia train/test theo thời gian trên từng customer.
+4. Huấn luyện implicit ALS.
+5. So sánh với popularity baseline.
+6. Đánh giá `Precision@10`, `Recall@10`, `MAP@10`, `NDCG@10`.
+7. Lọc sản phẩm đã có trong train và sinh top-10 recommendation.
+8. Lưu model, output, validation và biểu đồ.
+
+---
+
+## 9. Output Chính
 
 Cleaned Parquet outputs:
 
@@ -247,12 +280,33 @@ data/processed/sessions_cleaned_parquet
 data/processed/products_cleaned_parquet
 data/processed/orders_cleaned_parquet
 data/processed/order_items_cleaned_parquet
+data/processed/reviews_cleaned_parquet
 ```
 
 Validation outputs:
 
 ```text
 data/output/task1_validation/
+```
+
+Các output phân tích:
+
+```text
+data/output/task2_metrics/
+data/output/task3_category_statistics/
+data/output/task4_recommendation/
+```
+
+Task 4 có:
+
+```text
+als_model/
+evaluation_metrics/
+recommendations_csv/
+recommendations_parquet/
+validation/
+images/model_metrics_comparison.svg
+images/interaction_distribution.svg
 ```
 
 Thành viên làm Task 2-4 nên đọc dữ liệu từ:
@@ -265,7 +319,7 @@ Không nên đọc trực tiếp từ `data/raw/` trừ khi cần kiểm tra d�
 
 ---
 
-## 9. Output Của Task 2
+## 10. Output Của Task 2
 
 Task 2 ghi CSV output vào các thư mục sau:
 
@@ -281,7 +335,7 @@ Các thư mục output này đang được ignore bởi Git, nên cần chạy l
 
 ---
 
-## 10. Tóm Tắt Dữ Liệu Đã Clean
+## 11. Tóm Tắt Dữ Liệu Đã Clean
 
 | Bảng | Số dòng sau clean |
 |---|---:|
@@ -291,6 +345,7 @@ Các thư mục output này đang được ignore bởi Git, nên cần chạy l
 | products | 1,197 |
 | orders | 33,580 |
 | order_items | 59,053 |
+| reviews | 10,780 |
 
 Kết quả relationship validation:
 
@@ -302,12 +357,14 @@ Kết quả relationship validation:
 | orders.customer_id -> customers.customer_id | 0 |
 | order_items.order_id -> orders.order_id | 0 |
 | order_items.product_id -> products.product_id | 0 |
+| reviews.order_id -> orders.order_id | 0 |
+| reviews.product_id -> products.product_id | 0 |
 
 Điều này có nghĩa là các bảng đã clean sẵn sàng để join trong các task sau.
 
 ---
 
-## 11. Các Quyết Định Cleaning Quan Trọng
+## 12. Các Quyết Định Cleaning Quan Trọng
 
 ### Không drop null toàn cục trong `events`
 
@@ -345,7 +402,7 @@ Không thêm `end_time` vào sessions schema trừ khi raw dataset thay đổi.
 
 ---
 
-## 12. Gợi Ý Cho Task 2, Task 3, Task 4
+## 13. Gợi Ý Cho Task 2, Task 3, Task 4
 
 ### Gợi ý cho Task 2
 
@@ -436,7 +493,7 @@ events_cleaned_parquet
 
 ---
 
-## 13. Quy Tắc Phát Triển Cho Team
+## 14. Quy Tắc Phát Triển Cho Team
 
 Vui lòng tuân thủ các quy tắc sau:
 
@@ -478,7 +535,7 @@ PYTHONPATH=src python3 -m task2.active_users_spark
 
 ---
 
-## 14. Ghi Chú Về Git
+## 15. Ghi Chú Về Git
 
 Dự án này nằm trong một Git repo lớn hơn:
 
@@ -521,7 +578,7 @@ Tránh commit:
 
 ---
 
-## 15. Tài Liệu Chi Tiết Hơn
+## 16. Tài Liệu Chi Tiết Hơn
 
 Để đọc phần giải thích chi tiết cho người phụ trách dự án, xem:
 

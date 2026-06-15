@@ -31,3 +31,6 @@ Thumbs.db
 *.env
 
 doc/
+!doc/readme_GThich.md
+!doc/bao_cao_ky_thuat.md
+!doc/kich_ban_thuyet_trinh_demo.md

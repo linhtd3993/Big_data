@@ -16,6 +16,10 @@ DOCS_DIR = PROJECT_ROOT / "docs"
 TASK1_VALIDATION_DIR = OUTPUT_DIR / "task1_validation"
 SUPPORTING_TABLES_VALIDATION_DIR = TASK1_VALIDATION_DIR / "supporting_tables"
 RELATIONSHIP_VALIDATION_DIR = TASK1_VALIDATION_DIR / "relationship_validation"
+BUSINESS_VALIDATION_DIR = TASK1_VALIDATION_DIR / "business_validation"
+TASK2_OUTPUT_DIR = OUTPUT_DIR / "task2_metrics"
+TASK3_OUTPUT_DIR = OUTPUT_DIR / "task3_category_statistics"
+TASK4_OUTPUT_DIR = OUTPUT_DIR / "task4_recommendation"
 
 # Danh sach tat ca bang raw co trong dataset.
 RAW_TABLE_NAMES = [
@@ -35,4 +39,5 @@ TASK1_SUPPORTING_TABLE_NAMES = [
     "products",
     "orders",
     "order_items",
+    "reviews",
 ]
